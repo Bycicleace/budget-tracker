@@ -8,11 +8,9 @@ request.onupgradeneeded = function(event) {
 };
 
 request.onsuccess = function(event) {
-    console.log("request success");
     db = event.target.result;
 
     if (navigator.onLine) {
-        console.log("online");
         uploadTransaction();
     }
 };
@@ -34,7 +32,6 @@ function uploadTransaction() {
     const getAll = tranObjectStore.getAll();
 
     getAll.onsuccess = function() {
-        console.log(getAll.result);
         if (getAll.result.length > 1) {
             fetch('/api/transaction/bulk', {
                 method: 'POST',

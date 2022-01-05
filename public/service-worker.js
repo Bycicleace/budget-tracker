@@ -34,6 +34,8 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-    // Handling requests
+    event.respondWith(
+        caches.match(event.request).then((request) => request || fetch(e.request))
+    );
 });
 

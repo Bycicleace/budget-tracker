@@ -8,10 +8,12 @@ request.onupgradeneeded = function(event) {
 };
 
 request.onsuccess = function(event) {
+    console.log("request success");
     db = event.target.result;
 
-    if (navigator.online) {
-        // uploadTransaction
+    if (navigator.onLine) {
+        console.log("online");
+        uploadTransaction();
     }
 };
 
@@ -31,5 +33,32 @@ function uploadTransaction() {
     const tranObjectStore = dbTran.objectStore('new_transaction');
     const getAll = tranObjectStore.getAll();
 
+    getAll.onsuccess = function() {
+        console.log(getAll.result);
+        if (getAll.result.length > 1) {
+            fetch('/api/transaction/bulk', {
+                method: 'POST',
+                body: JSON.stringify(getAll.result),
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    return response.json();
+                })
+                .then(serverResponse => {
+                    if (serverResponse.message) {
+                        throw new Error(serverResponse);
+                    }
 
+                    const dbTran = db.transaction(['new_transaction'], 'readwrite');
+                    const tranObjectStore = dbTran.objectStore('new_transaction');
+                    tranObjectStore.clear();
+                })
+                .catch(err => {console.log(err)});
+        }
+    }
 }
+
+window.addEventListener('online', uploadTransaction);

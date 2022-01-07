@@ -47,6 +47,10 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
         caches.match(event.request).then(function (request) {
             if (request) {
+                if (event.request.url.indexOf('/api/') > 0) {
+                    console.log("Bypassed cache: " + String(event.request.url));
+                    return fetch(event.request);
+                }
                 console.log("responded with cache: " + event.request.url);
                 return request;
             } else {
